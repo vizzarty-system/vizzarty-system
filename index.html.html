@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberPro — Sistema de Gestão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#0E0A08;--bg2:#161009;--card:#1C1310;--card2:#231810;--border:#2E1F16;--border2:#3A2518;
+  --text:#F5EDE0;--muted:#8A6A52;--muted2:#5A4030;
+  --amber:#D4870A;--amber2:#F0A020;--amber-bg:#2A1C08;--amber-border:#4A3010;
+  --green:#2A9060;--green-bg:#0A2018;--green-text:#5ADBA0;
+  --red:#C03030;--red-bg:#200808;--red-text:#FF7070;
+  --blue:#2060B0;--blue-bg:#080E20;--blue-text:#70A8FF;
+  --purple:#6040B0;--purple-bg:#100820;--purple-text:#B090FF;
+  --r:8px;--r2:12px;--r3:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;overflow:hidden;}
+h1,h2,h3,.serif{font-family:'Playfair Display',serif;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
+
+/* LAYOUT */
+.shell{display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+.logo-wrap{padding:22px 18px 18px;border-bottom:1px solid var(--border);}
+.logo-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--amber),#7A4500);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.logo-icon i{font-size:20px;color:#fff;}
+.logo-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--text);line-height:1;}
+.logo-tagline{font-size:11px;color:var(--muted);margin-top:3px;}
+.nav{flex:1;padding:10px 8px;overflow-y:auto;}
+.nav-section{font-size:10px;font-weight:600;color:var(--muted2);letter-spacing:1.2px;text-transform:uppercase;padding:12px 10px 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r);cursor:pointer;color:var(--muted);font-size:13px;font-weight:400;transition:all .15s;position:relative;margin-bottom:1px;}
+.nav-item:hover{background:var(--card);color:var(--text);}
+.nav-item.active{background:var(--amber-bg);color:var(--amber2);font-weight:500;}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;height:60%;width:3px;background:var(--amber);border-radius:0 3px 3px 0;}
+.nav-item i{font-size:17px;flex-shrink:0;}
+.nav-badge{margin-left:auto;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--amber-bg);color:var(--amber2);font-weight:600;}
+.nav-badge.red{background:var(--red-bg);color:var(--red-text);}
+.sidebar-footer{padding:14px;border-top:1px solid var(--border);}
+.lock-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;width:100%;transition:all .15s;}
+.lock-btn:hover{background:var(--card);color:var(--text);}
+.lock-btn.unlocked{border-color:var(--green);color:var(--green-text);background:var(--green-bg);}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+.topbar{padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.topbar-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--text);}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.top-chip{font-size:11px;padding:4px 10px;border-radius:99px;display:flex;align-items:center;gap:5px;}
+.top-chip.amber{background:var(--amber-bg);color:var(--amber2);border:1px solid var(--amber-border);}
+.top-chip.green{background:var(--green-bg);color:var(--green-text);}
+.content{flex:1;overflow-y:auto;padding:20px 24px;}
+.page{display:none;}
+.page.active{display:block;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:16px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.card-title{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px;}
+.card-title i{font-size:15px;color:var(--amber);}
+.card-subtitle{font-size:11px;color:var(--muted);}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;position:relative;overflow:hidden;}
+.metric::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.metric.amber::after{background:linear-gradient(90deg,var(--amber),transparent);}
+.metric.green::after{background:linear-gradient(90deg,var(--green),transparent);}
+.metric.blue::after{background:linear-gradient(90deg,#2060B0,transparent);}
+.metric.purple::after{background:linear-gradient(90deg,var(--purple),transparent);}
+.metric-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.metric-icon.amber{background:var(--amber-bg);}
+.metric-icon.amber i{color:var(--amber2);}
+.metric-icon.green{background:var(--green-bg);}
+.metric-icon.green i{color:var(--green-text);}
+.metric-icon.blue{background:var(--blue-bg);}
+.metric-icon.blue i{color:var(--blue-text);}
+.metric-icon.purple{background:var(--purple-bg);}
+.metric-icon.purple i{color:var(--purple-text);}
+.metric-val{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:var(--text);line-height:1;}
+.metric-label{font-size:11px;color:var(--muted);margin-top:4px;}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* INPUTS */
+.field{margin-bottom:10px;}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;}
+input,select,textarea{background:var(--bg);border:1px solid var(--border2);border-radius:var(--r);padding:9px 12px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--amber);background:var(--bg2);}
+select option{background:var(--card);}
+.grid-form{display:grid;gap:10px;}
+.grid-2{grid-template-columns:1fr 1fr;}
+.grid-3{grid-template-columns:1fr 1fr 1fr;}
+.grid-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--r);border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:var(--amber);color:#0E0A08;}
+.btn-primary:hover{background:var(--amber2);}
+.btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border2);}
+.btn-secondary:hover{background:var(--card);border-color:var(--border2);}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--card);color:var(--text);}
+.btn-danger{background:var(--red-bg);color:var(--red-text);border:1px solid var(--red-bg);}
+.btn-danger:hover{border-color:var(--red);}
+.btn-success{background:var(--green-bg);color:var(--green-text);border:1px solid var(--green-bg);}
+.btn-success:hover{border-color:var(--green);}
+.btn-info{background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue-bg);}
+.btn-info:hover{border-color:var(--blue);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+.btn-xs{padding:3px 8px;font-size:11px;}
+.btn-full{width:100%;justify-content:center;}
+
+/* PILLS / TAGS */
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:99px;font-weight:500;}
+.pill-wait{background:var(--amber-bg);color:var(--amber2);}
+.pill-in{background:var(--blue-bg);color:var(--blue-text);}
+.pill-done{background:var(--green-bg);color:var(--green-text);}
+.pill-portal{background:var(--purple-bg);color:var(--purple-text);}
+.pill-agend{background:#102010;color:#60C080;}
+
+/* QUEUE */
+.queue-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);margin-bottom:6px;transition:border-color .15s;}
+.queue-item:hover{border-color:var(--border2);}
+.queue-item.status-in{border-left:3px solid var(--blue);}
+.queue-item.status-done{opacity:.6;}
+.queue-num{width:26px;height:26px;border-radius:50%;background:var(--amber-bg);color:var(--amber2);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.queue-info{flex:1;min-width:0;}
+.queue-name{font-size:13px;font-weight:600;color:var(--text);}
+.queue-meta{display:flex;gap:6px;margin-top:3px;flex-wrap:wrap;align-items:center;}
+.queue-price{font-size:13px;font-weight:600;color:var(--green-text);white-space:nowrap;}
+.queue-actions{display:flex;gap:4px;flex-shrink:0;}
+
+/* PROFESSIONALS */
+.prof-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.prof-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:16px;text-align:center;}
+.prof-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--amber-bg),var(--amber-border));color:var(--amber2);font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;border:2px solid var(--amber-border);}
+.prof-card-name{font-size:14px;font-weight:600;color:var(--text);}
+.prof-card-esp{font-size:11px;color:var(--muted);margin:3px 0 10px;}
+.prof-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;}
+.prof-stat-box{background:var(--bg);border-radius:var(--r);padding:7px;border:1px solid var(--border);}
+.prof-stat-val{font-size:14px;font-weight:600;color:var(--text);}
+.prof-stat-lbl{font-size:10px;color:var(--muted);}
+.hidden-val{display:inline-flex;align-items:center;gap:3px;}
+.hidden-val span{letter-spacing:2px;color:var(--muted2);}
+
+/* SERVICES TABLE */
+.svc-table{width:100%;border-collapse:collapse;}
+.svc-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg2);}
+.svc-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+.svc-table tr:last-child td{border-bottom:none;}
+.svc-table tr:hover td{background:var(--bg2);}
+.svc-table .editing td{background:var(--blue-bg)!important;}
+.edit-inp{background:var(--bg2)!important;border:1px solid var(--blue)!important;color:var(--blue-text)!important;padding:5px 8px!important;width:100%;}
+
+/* EXTRATO */
+.ext-table{width:100%;border-collapse:collapse;}
+.ext-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;}
+.ext-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);font-size:12px;vertical-align:middle;}
+.ext-table tr:last-child td{border-bottom:none;}
+.ext-table tr:hover td{background:var(--bg2);}
+.ext-total td{background:var(--card2)!important;font-weight:600;}
+
+/* LOCK SCREEN */
+.lock-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:320px;gap:16px;}
+.lock-icon{width:70px;height:70px;border-radius:50%;background:var(--amber-bg);border:2px solid var(--amber-border);display:flex;align-items:center;justify-content:center;}
+.lock-icon i{font-size:32px;color:var(--amber);}
+.lock-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--text);}
+.lock-sub{font-size:13px;color:var(--muted);text-align:center;max-width:280px;line-height:1.6;}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px);}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:var(--r3);padding:28px;width:340px;max-width:95vw;}
+.modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin-bottom:6px;color:var(--text);}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.pin-row{display:flex;gap:10px;justify-content:center;margin-bottom:10px;}
+.pin-inp{width:52px;height:52px;text-align:center;font-size:22px;font-weight:700;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg);color:var(--text);padding:0;font-family:'DM Sans',sans-serif;}
+.pin-inp:focus{border-color:var(--amber);background:var(--bg2);}
+.modal-err{font-size:12px;color:var(--red-text);text-align:center;min-height:16px;}
+
+/* LINK / PORTAL */
+.link-hero{background:linear-gradient(135deg,#1C1005,#2A1808);border:1px solid var(--amber-border);border-radius:var(--r2);padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;}
+.link-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:16px;margin-bottom:12px;}
+.link-url-box{background:var(--bg);border:1px solid var(--border2);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--muted);font-family:monospace;word-break:break-all;margin-bottom:10px;}
+
+/* PORTAL PREVIEW */
+.portal-preview{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r3);overflow:hidden;max-width:380px;margin:0 auto;}
+.portal-header{background:linear-gradient(135deg,#1A0C05,#2E1808);padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.portal-body{padding:16px;overflow-y:auto;max-height:460px;}
+.portal-step{display:none;}
+.portal-step.active{display:block;}
+.svc-opt{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;margin-bottom:8px;transition:all .15s;}
+.svc-opt:hover,.svc-opt.sel{border-color:var(--amber);background:var(--amber-bg);}
+.svc-opt.sel{border-width:1.5px;}
+.prof-opt{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;margin-bottom:8px;transition:all .15s;}
+.prof-opt:hover,.prof-opt.sel{border-color:var(--amber);background:var(--amber-bg);}
+.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.time-btn{padding:9px;border:1px solid var(--border);border-radius:var(--r);text-align:center;cursor:pointer;font-size:13px;color:var(--text);transition:all .15s;}
+.time-btn:hover,.time-btn.sel{border-color:var(--amber);background:var(--amber-bg);color:var(--amber2);}
+.portal-success{text-align:center;padding:24px 16px;}
+.portal-pos{font-family:'Playfair Display',serif;font-size:52px;font-weight:700;color:var(--amber);}
+
+/* TOGGLE */
+.toggle-wrap{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.toggle-wrap:last-child{border-bottom:none;}
+.toggle-info h4{font-size:13px;font-weight:500;color:var(--text);}
+.toggle-info p{font-size:11px;color:var(--muted);margin-top:2px;}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-track{position:absolute;inset:0;border-radius:99px;background:var(--border2);transition:background .2s;cursor:pointer;}
+.toggle input:checked+.toggle-track{background:var(--amber);}
+.toggle-knob{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;pointer-events:none;}
+.toggle input:checked~.toggle-knob{left:21px;}
+
+/* QR */
+.qr-mock{width:110px;height:110px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);padding:12px 16px;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px;animation:toastIn .2s ease;max-width:280px;}
+.toast.success{border-color:var(--green);color:var(--green-text);}
+.toast.error{border-color:var(--red);color:var(--red-text);}
+.toast.info{border-color:var(--blue);color:var(--blue-text);}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:none;}}
+
+/* EDIT PROF BADGE */
+.edit-window{font-size:10px;background:var(--amber-bg);color:var(--amber2);padding:2px 7px;border-radius:99px;border:1px solid var(--amber-border);}
+.edit-window.expired{background:var(--red-bg);color:var(--red-text);}
+
+/* SESSION / PERMISSIONS */
+.session-chip{font-size:11px;padding:5px 10px;border-radius:99px;background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue);display:inline-flex;align-items:center;gap:6px;}
+.admin-only-note{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber2);border-radius:var(--r);padding:9px 11px;font-size:12px;line-height:1.5;}
+.config-card.collapsed .config-body{display:none;}
+.config-card .collapse-icon{transition:transform .15s;}
+.config-card.collapsed .collapse-icon{transform:rotate(-90deg);}
+.login-role{padding:11px;border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;background:var(--bg);color:var(--muted);display:flex;align-items:center;gap:8px;}
+.login-role.active{border-color:var(--amber);background:var(--amber-bg);color:var(--amber2);}
+
+/* SEPARATORS */
+.sep{height:1px;background:var(--border);margin:14px 0;}
+.section-title{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-wrap">
+      <div class="logo-icon"><i class="ti ti-scissors"></i></div>
+      <div class="logo-name">BarberPro</div>
+      <div class="logo-tagline" id="sb-barbname">Minha Barbearia</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Operação</div>
+      <div class="nav-item active" onclick="nav('fila',this)" id="nav-fila">
+        <i class="ti ti-users"></i> Fila / Agenda
+        <span class="nav-badge" id="nb-fila" style="display:none">0</span>
+      </div>
+      <div class="nav-item" onclick="nav('profissionais',this)"><i class="ti ti-user-star"></i> Profissionais</div>
+      <div class="nav-item" onclick="nav('servicos',this)"><i class="ti ti-list-details"></i> Serviços</div>
+      <div class="nav-section">Financeiro</div>
+      <div class="nav-item" onclick="nav('extrato',this)">
+        <i class="ti ti-receipt-2"></i> Extrato
+        <span class="nav-badge" style="background:var(--amber-bg);color:var(--amber2);border:none;">🔒</span>
+      </div>
+      <div class="nav-section">Clientes</div>
+      <div class="nav-item" onclick="nav('link',this)">
+        <i class="ti ti-link"></i> Link Cliente
+        <span class="nav-badge" id="nb-portal" style="display:none">0</span>
+      </div>
+      <div class="nav-section">Sistema</div>
+      <div class="nav-item" onclick="nav('config',this)"><i class="ti ti-settings"></i> Configurações</div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="lock-btn" id="lock-btn" onclick="toggleLock()">
+        <i class="ti ti-lock" id="lock-icon"></i>
+        <span id="lock-txt">Sessão bloqueada</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="topbar-title" id="page-title">Fila de Atendimento</span>
+      </div>
+      <div class="topbar-right">
+        <div class="session-chip" id="session-chip" onclick="abrirLogin()" title="Trocar usuário"><i class="ti ti-user-lock"></i> <span>Login</span></div>
+        <div class="top-chip amber" id="chip-fila"><i class="ti ti-clock"></i> <span id="chip-fila-txt">0 aguardando</span></div>
+        <div class="top-chip" id="chip-date" style="background:var(--card);color:var(--muted);border:1px solid var(--border);font-size:11px;padding:4px 10px;border-radius:99px;"></div>
+      </div>
+    </div>
+    <div class="content" id="main-content">
+
+      <!-- ====== FILA ====== -->
+      <div class="page active" id="page-fila">
+        <div class="metrics" id="metrics-row"></div>
+        <div class="two-col">
+          <!-- ADD CLIENT FORM -->
+          <div class="card">
+            <div class="card-header"><span class="card-title"><i class="ti ti-user-plus"></i> Adicionar cliente</span></div>
+            <div class="grid-form">
+              <div class="field"><label>Nome do cliente</label><input id="f-nome" placeholder="Nome completo"></div>
+              <div class="field"><label>Telefone</label><input id="f-tel" placeholder="(00) 00000-0000" maxlength="15" oninput="maskPhone(this)"></div>
+              <div class="grid-form grid-2">
+                <div class="field"><label>Serviço</label><select id="f-serv"></select></div>
+                <div class="field"><label>Profissional</label><select id="f-prof"></select></div>
+              </div>
+              <div class="grid-form grid-3">
+                <div class="field"><label>Data do atendimento</label><input type="date" id="f-data"></div>
+                <div class="field"><label>Tipo</label>
+                  <select id="f-tipo">
+                    <option value="chegada">Chegada imediata</option>
+                    <option value="agendado">Agendamento</option>
+                    <option value="retroativo">Atendimento passado</option>
+                  </select>
+                </div>
+                <div class="field"><label>Horário</label><input type="time" id="f-hora"></div>
+              </div>
+              <button class="btn btn-primary btn-full" onclick="addCliente()"><i class="ti ti-user-plus"></i> Entrar na fila</button>
+            </div>
+          </div>
+          <!-- QUEUE LIST -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><i class="ti ti-list-numbers"></i> Fila atual</span>
+              <span class="card-subtitle" id="fila-count">0 clientes</span>
+            </div>
+            <div id="fila-list"><div style="color:var(--muted);font-size:13px;text-align:center;padding:30px 0;"><i class="ti ti-mood-empty" style="font-size:28px;display:block;margin-bottom:8px;"></i>Nenhum cliente na fila</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== PROFISSIONAIS ====== -->
+      <div class="page" id="page-profissionais">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header"><span class="card-title"><i class="ti ti-user-plus"></i> Adicionar profissional</span></div>
+          <div class="grid-form grid-4">
+            <div class="field"><label>Nome</label><input id="pf-nome" placeholder="Nome completo"></div>
+            <div class="field"><label>Especialidade</label><input id="pf-esp" placeholder="Ex: Barbeiro"></div>
+            <div class="field"><label>Comissão %</label><input id="pf-com" type="number" placeholder="40" min="0" max="100"></div>
+            <div class="field"><label>Senha do barbeiro</label><input id="pf-senha" type="password" placeholder="4 dígitos" maxlength="4" inputmode="numeric"></div>
+            <div class="field" style="grid-column:1/-1;"><button class="btn btn-primary btn-full" onclick="addProf()"><i class="ti ti-plus"></i> Adicionar</button></div>
+          </div>
+        </div>
+        <div class="prof-grid" id="prof-grid"></div>
+      </div>
+
+      <!-- ====== SERVIÇOS ====== -->
+      <div class="page" id="page-servicos">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header"><span class="card-title"><i class="ti ti-plus"></i> Novo serviço</span></div>
+          <div class="grid-form grid-4">
+            <div class="field"><label>Nome do serviço</label><input id="sv-nome" placeholder="Ex: Corte + Barba"></div>
+            <div class="field"><label>Duração (min)</label><input id="sv-dur" type="number" placeholder="30" min="5"></div>
+            <div class="field"><label>Preço (R$)</label><input id="sv-preco" type="number" placeholder="35.00" step="0.50" min="0"></div>
+            <div class="field"><label>&nbsp;</label><button class="btn btn-primary btn-full" onclick="addServico()"><i class="ti ti-plus"></i> Adicionar</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title"><i class="ti ti-table"></i> Tabela de serviços</span>
+            <span class="card-subtitle"><i class="ti ti-edit" style="font-size:12px;"></i> Clique em Editar para alterar</span>
+          </div>
+          <div style="overflow-x:auto;"><table class="svc-table" id="svc-table"></table></div>
+        </div>
+      </div>
+
+      <!-- ====== EXTRATO ====== -->
+      <div class="page" id="page-extrato">
+        <div id="ext-lock"></div>
+        <div id="ext-content" style="display:none;">
+          <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;">
+            <div class="field" style="margin:0;flex:1;min-width:130px;"><label>Profissional</label><select id="ext-prof"></select></div>
+            <div class="field" style="margin:0;"><label>De</label><input type="date" id="ext-de" style="width:140px;"></div>
+            <div class="field" style="margin:0;"><label>Até</label><input type="date" id="ext-ate" style="width:140px;"></div>
+            <button class="btn btn-primary" onclick="gerarExtrato()"><i class="ti ti-filter"></i> Filtrar</button>
+            <button class="btn btn-secondary" onclick="exportCSV()"><i class="ti ti-download"></i> CSV</button>
+            <button class="btn btn-danger btn-sm" onclick="lockExtrato()"><i class="ti ti-lock"></i> Bloquear</button>
+          </div>
+          <div id="ext-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;"></div>
+          <div class="card" style="overflow-x:auto;max-height:320px;overflow-y:auto;">
+            <table class="ext-table" id="ext-table"></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== LINK CLIENTE ====== -->
+      <div class="page" id="page-link">
+        <div class="link-hero">
+          <div style="width:48px;height:48px;border-radius:12px;background:var(--amber-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="ti ti-link" style="font-size:22px;color:var(--amber);"></i>
+          </div>
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--text);">Portal de autoatendimento</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px;">Compartilhe o link — clientes entram na fila ou agendam pelo celular, sem precisar estar presentes</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div class="link-card">
+            <div class="section-title"><i class="ti ti-walk" style="font-size:13px;"></i> Fila imediata</div>
+            <div class="link-url-box" id="url-fila">barberpro.app/fila/minha-barbearia</div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-secondary btn-sm" onclick="copiarLink('url-fila')"><i class="ti ti-copy"></i> Copiar</button>
+              <button class="btn btn-sm" style="background:var(--amber-bg);color:var(--amber2);border:1px solid var(--amber-border);" onclick="abrirPortal('fila')"><i class="ti ti-eye"></i> Visualizar</button>
+            </div>
+          </div>
+          <div class="link-card">
+            <div class="section-title"><i class="ti ti-calendar" style="font-size:13px;"></i> Agendamento</div>
+            <div class="link-url-box" id="url-agend">barberpro.app/agendar/minha-barbearia</div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-secondary btn-sm" onclick="copiarLink('url-agend')"><i class="ti ti-copy"></i> Copiar</button>
+              <button class="btn btn-sm" style="background:var(--amber-bg);color:var(--amber2);border:1px solid var(--amber-border);" onclick="abrirPortal('agendamento')"><i class="ti ti-eye"></i> Visualizar</button>
+            </div>
+          </div>
+        </div>
+        <div class="link-card" style="margin-bottom:14px;">
+          <div class="section-title"><i class="ti ti-qrcode" style="font-size:13px;"></i> QR Code</div>
+          <div style="display:flex;gap:16px;align-items:center;">
+            <div class="qr-mock">
+              <svg viewBox="0 0 80 80" width="88" height="88" fill="var(--amber2)" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4" y="4" width="28" height="28" fill="none" stroke="currentColor" stroke-width="3"/>
+                <rect x="10" y="10" width="16" height="16"/>
+                <rect x="48" y="4" width="28" height="28" fill="none" stroke="currentColor" stroke-width="3"/>
+                <rect x="54" y="10" width="16" height="16"/>
+                <rect x="4" y="48" width="28" height="28" fill="none" stroke="currentColor" stroke-width="3"/>
+                <rect x="10" y="54" width="16" height="16"/>
+                <rect x="48" y="48" width="8" height="8"/><rect x="60" y="48" width="8" height="8"/>
+                <rect x="48" y="60" width="8" height="8"/><rect x="60" y="60" width="8" height="8"/>
+                <rect x="36" y="4" width="8" height="8"/><rect x="36" y="16" width="8" height="8"/>
+                <rect x="36" y="28" width="8" height="8"/><rect x="4" y="36" width="8" height="8"/>
+                <rect x="16" y="36" width="8" height="8"/><rect x="28" y="36" width="8" height="8"/>
+                <rect x="40" y="36" width="8" height="8"/>
+              </svg>
+            </div>
+            <div>
+              <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:10px;">Imprima e cole na recepção. Clientes escaneiam e entram na fila diretamente pelo celular.</p>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-primary btn-sm" onclick="toast('QR Code baixado!','success')"><i class="ti ti-download"></i> Baixar</button>
+                <button class="btn btn-secondary btn-sm" onclick="toast('Link copiado!','success')"><i class="ti ti-share"></i> Compartilhar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="link-card">
+          <div class="section-title"><i class="ti ti-adjustments" style="font-size:13px;"></i> Configurações do portal</div>
+          <div class="toggle-wrap">
+            <div class="toggle-info"><h4>Entrada na fila pelo link</h4><p>Clientes entram direto sem aprovação</p></div>
+            <label class="toggle"><input type="checkbox" id="tog-fila" checked><div class="toggle-track" onclick="this.previousElementSibling.click()"></div><div class="toggle-knob"></div></label>
+          </div>
+          <div class="toggle-wrap">
+            <div class="toggle-info"><h4>Agendamento pelo link</h4><p>Clientes escolhem data e horário</p></div>
+            <label class="toggle"><input type="checkbox" id="tog-agend" checked><div class="toggle-track" onclick="this.previousElementSibling.click()"></div><div class="toggle-knob"></div></label>
+          </div>
+          <div class="toggle-wrap">
+            <div class="toggle-info"><h4>Mostrar tempo de espera</h4><p>Exibe posição e tempo estimado ao cliente</p></div>
+            <label class="toggle"><input type="checkbox" id="tog-espera" checked><div class="toggle-track" onclick="this.previousElementSibling.click()"></div><div class="toggle-knob"></div></label>
+          </div>
+        </div>
+        <!-- PORTAL PREVIEW -->
+        <div id="portal-area" style="display:none;margin-top:20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:600;color:var(--text);"><i class="ti ti-device-mobile" style="font-size:15px;vertical-align:-2px;color:var(--amber);"></i> Prévia — como o cliente vê</div>
+            <button class="btn btn-ghost btn-sm" onclick="fecharPortal()"><i class="ti ti-x"></i> Fechar</button>
+          </div>
+          <div class="portal-preview">
+            <div class="portal-header">
+              <div style="width:38px;height:38px;border-radius:10px;background:var(--amber-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-scissors" style="font-size:18px;color:var(--amber2);"></i></div>
+              <div style="flex:1;">
+                <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--text);" id="p-bizname">Minha Barbearia</div>
+                <div style="font-size:11px;color:var(--muted);" id="p-fila-status">0 na fila — ~0 min</div>
+              </div>
+            </div>
+            <div class="portal-body" id="portal-body"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== CONFIG ====== -->
+      <div class="page" id="page-config">
+        <div class="admin-only-note" id="cfg-admin-note" style="margin-bottom:14px;display:none;"><i class="ti ti-lock"></i> Área administrativa: barbeiros só conseguem alterar informações de atendimento com autorização do admin.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="card config-card">
+            <div class="card-header" onclick="toggleConfigCard(this)" style="cursor:pointer;"><span class="card-title"><i class="ti ti-building-store"></i> Dados da barbearia</span><button class="btn btn-ghost btn-xs"><i class="ti ti-chevron-down collapse-icon"></i> Minimizar</button></div>
+            <div class="grid-form config-body">
+              <div class="field"><label>Nome da barbearia</label><input id="cfg-nome" placeholder="Nome da barbearia"></div>
+              <div class="field"><label>Endereço</label><input id="cfg-end" placeholder="Rua, número..."></div>
+              <div class="field"><label>Telefone</label><input id="cfg-tel" placeholder="(00) 00000-0000"></div>
+              <button class="btn btn-primary" onclick="salvarConfig()"><i class="ti ti-check"></i> Salvar dados</button>
+            </div>
+          </div>
+          <div class="card config-card">
+            <div class="card-header" onclick="toggleConfigCard(this)" style="cursor:pointer;"><span class="card-title"><i class="ti ti-lock"></i> Senha do admin</span><button class="btn btn-ghost btn-xs"><i class="ti ti-chevron-down collapse-icon"></i> Minimizar</button></div>
+            <div class="config-body">
+              <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Protege extrato, comissões e autorização de edição. Padrão: <strong style="color:var(--text);">1234</strong></p>
+              <div class="grid-form">
+                <div class="field"><label>Senha atual</label><input type="password" id="cfg-s-atual" placeholder="Senha atual"></div>
+                <div class="field"><label>Nova senha (4 dígitos)</label><input type="password" id="cfg-s-nova" placeholder="Nova senha" maxlength="4"></div>
+                <div class="field"><label>Confirmar nova senha</label><input type="password" id="cfg-s-conf" placeholder="Confirme a nova senha" maxlength="4"></div>
+                <div id="cfg-msg" style="font-size:12px;min-height:14px;"></div>
+                <button class="btn btn-primary" onclick="alterarSenha()"><i class="ti ti-lock-check"></i> Salvar senha</button>
+              </div>
+            </div>
+          </div>
+          <div class="card config-card">
+            <div class="card-header" onclick="toggleConfigCard(this)" style="cursor:pointer;"><span class="card-title"><i class="ti ti-user-lock"></i> Senhas dos barbeiros</span><button class="btn btn-ghost btn-xs"><i class="ti ti-chevron-down collapse-icon"></i> Minimizar</button></div>
+            <div class="config-body">
+              <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Cada barbeiro entra com a própria senha e vê somente os serviços dele e o total da comissão.</p>
+              <div id="cfg-prof-senhas"></div>
+            </div>
+          </div>
+          <div class="card config-card">
+            <div class="card-header" onclick="toggleConfigCard(this)" style="cursor:pointer;"><span class="card-title"><i class="ti ti-database"></i> Dados do sistema</span><button class="btn btn-ghost btn-xs"><i class="ti ti-chevron-down collapse-icon"></i> Minimizar</button></div>
+            <div class="config-body">
+              <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Os dados são salvos automaticamente no seu navegador (localStorage). Para vários aparelhos, conecte depois ao Supabase.</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-secondary" onclick="exportarBackup()"><i class="ti ti-file-download"></i> Exportar backup</button>
+                <button class="btn btn-danger" onclick="limparDados()"><i class="ti ti-trash"></i> Limpar tudo</button>
+              </div>
+            </div>
+          </div>
+          <div class="card config-card" style="grid-column:1/-1;">
+            <div class="card-header" onclick="toggleConfigCard(this)" style="cursor:pointer;"><span class="card-title"><i class="ti ti-clock-edit"></i> Regras de edição</span><button class="btn btn-ghost btn-xs"><i class="ti ti-chevron-down collapse-icon"></i> Minimizar</button></div>
+            <div class="config-body">
+              <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Barbeiro não altera atendimento sozinho. Para mudar profissional ou informações financeiras, precisa digitar a senha do admin na hora da edição.</p>
+              <div style="background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--amber2);">
+                <i class="ti ti-info-circle"></i> Admin consegue ver todos os extratos. Barbeiro vê somente os próprios serviços e o total da comissão.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- TOAST CONTAINER -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+/* ─── STORAGE ─── */
+const K = {
+  config:'bp_config', profissionais:'bp_profs', servicos:'bp_servs',
+  fila:'bp_fila', historico:'bp_hist', senha:'bp_senha', unlocked:'bp_unlocked', usuario:'bp_usuario'
+};
+function load(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){console.error(e);}}
+
+/* ─── STATE ─── */
+let config = load(K.config) || {nome:'Minha Barbearia',end:'',tel:''};
+let profissionais = load(K.profissionais) || [
+  {id:1,nome:'Carlos Silva',esp:'Barbeiro',comissao:40,senha:'1111',atendimentos:0,faturado:0},
+  {id:2,nome:'Rafael Oliveira',esp:'Barbeiro/Cabeleireiro',comissao:35,senha:'2222',atendimentos:0,faturado:0}
+];
+let servicos = load(K.servicos) || [
+  {id:1,nome:'Corte Simples',dur:30,preco:35},
+  {id:2,nome:'Corte + Barba',dur:45,preco:55},
+  {id:3,nome:'Barba',dur:20,preco:30},
+  {id:4,nome:'Hidratação',dur:30,preco:40},
+  {id:5,nome:'Pigmentação',dur:60,preco:80}
+];
+let fila = load(K.fila) || [];
+let historico = load(K.historico) || [];
+let senha = load(K.senha) || '1234';
+let desbloqueado = false;
+let usuario = load(K.usuario) || null;
+profissionais = profissionais.map((p,i)=>({...p, senha:p.senha || String(1111+i).padStart(4,'0')}));
+let editingSvcId = null;
+let portalMode = 'fila';
+let pServSel=null, pProfSel=null, pTimeSel=null;
+let nextId = Math.max(0,...fila.map(x=>x.id||0),...historico.map(x=>x.id||0)) + 1;
+
+/* ─── HELPERS ─── */
+function fmt(n){return n<10?'0'+n:n;}
+function nowTime(){const d=new Date();return fmt(d.getHours())+':'+fmt(d.getMinutes());}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+fmt(d.getMonth()+1)+'-'+fmt(d.getDate());}
+function brl(v){return 'R$'+(+v||0).toFixed(2).replace('.',',');}
+function slug(){return config.nome.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');}
+function maskPhone(el){let v=el.value.replace(/\D/g,'');if(v.length>11)v=v.slice(0,11);if(v.length>6)v='('+v.slice(0,2)+') '+v.slice(2,7)+'-'+v.slice(7);else if(v.length>2)v='('+v.slice(0,2)+') '+v.slice(2);el.value=v;}
+function sinceHours(ts){return (Date.now()-ts)/3600000;}
+function canEditProf(ts){return sinceHours(ts)<24;}
+
+function persist(){
+  save(K.profissionais,profissionais);
+  save(K.servicos,servicos);
+  save(K.fila,fila);
+  save(K.historico,historico);
+  save(K.config,config);
+  save(K.senha,senha);
+  save(K.usuario,usuario);
+}
+
+/* ─── TOAST ─── */
+function toast(msg,type='info'){
+  const w=document.getElementById('toast-wrap');
+  const d=document.createElement('div');
+  const icons={info:'ti-info-circle',success:'ti-check',error:'ti-x'};
+  d.className='toast '+type;
+  d.innerHTML=`<i class="ti ${icons[type]||icons.info}"></i> ${msg}`;
+  w.appendChild(d);
+  setTimeout(()=>d.style.opacity='0',2600);
+  setTimeout(()=>d.remove(),2800);
+}
+
+/* ─── NAVIGATION ─── */
+function nav(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  else document.querySelector(`[onclick*="'${id}'"]`)?.classList.add('active');
+  const titles={fila:'Fila de Atendimento',profissionais:'Profissionais',servicos:'Serviços & Valores',extrato:'Extrato Financeiro',link:'Link para Clientes',config:'Configurações'};
+  document.getElementById('page-title').textContent=titles[id]||id;
+  if(id==='profissionais') renderProfs();
+  if(id==='servicos') renderServicos();
+  if(id==='extrato'){desbloqueado?showExtrato():renderExtLock();}
+  if(id==='config') loadConfig();
+}
+
+/* ─── DATE ─── */
+function updateDate(){
+  const d=new Date();
+  const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  document.getElementById('chip-date').textContent=`${days[d.getDay()]}, ${fmt(d.getDate())} ${months[d.getMonth()]}`;
+}
+updateDate();setInterval(updateDate,60000);
+
+/* ─── METRICS ─── */
+function renderMetrics(){
+  const ag=fila.filter(x=>x.status==='aguardando').length;
+  const em=fila.filter(x=>x.status==='em_atendimento').length;
+  const done=historico.filter(x=>x.data===todayStr()).length;
+  const fat=historico.filter(x=>x.data===todayStr()).reduce((s,x)=>s+(x.serv?.preco||0),0);
+  document.getElementById('metrics-row').innerHTML=`
+    <div class="metric amber"><div class="metric-icon amber"><i class="ti ti-clock" style="font-size:16px;"></i></div><div class="metric-val">${ag}</div><div class="metric-label">Na fila</div></div>
+    <div class="metric blue"><div class="metric-icon blue"><i class="ti ti-scissors" style="font-size:16px;"></i></div><div class="metric-val">${em}</div><div class="metric-label">Em atendimento</div></div>
+    <div class="metric green"><div class="metric-icon green"><i class="ti ti-check" style="font-size:16px;"></i></div><div class="metric-val">${done}</div><div class="metric-label">Concluídos hoje</div></div>
+    <div class="metric purple"><div class="metric-icon purple"><i class="ti ti-currency-dollar" style="font-size:16px;"></i></div><div class="metric-val" style="font-size:18px;">${brl(fat)}</div><div class="metric-label">Faturamento hoje</div></div>`;
+  const chip=document.getElementById('chip-fila-txt');chip.textContent=ag+' aguardando';
+  const nb=document.getElementById('nb-fila');
+  if(ag>0){nb.textContent=ag;nb.style.display='';}else nb.style.display='none';
+  const portal=fila.filter(x=>x.origem==='portal'&&x.status==='aguardando').length;
+  const nbp=document.getElementById('nb-portal');
+  if(portal>0){nbp.textContent=portal;nbp.style.display='';}else nbp.style.display='none';
+}
+
+/* ─── FILA ─── */
+function populateSelects(){
+  const ss=document.getElementById('f-serv');
+  ss.innerHTML=servicos.map(s=>`<option value="${s.id}">${s.nome} — ${brl(s.preco)}</option>`).join('');
+  const sp=document.getElementById('f-prof');
+  sp.innerHTML='<option value="">Qualquer profissional</option>'+profissionais.map(p=>`<option value="${p.id}">${p.nome}</option>`).join('');
+  document.getElementById('f-hora').value=nowTime();
+  const fd=document.getElementById('f-data'); if(fd) fd.value=todayStr();
+}
+
+function addCliente(){
+  const nome=document.getElementById('f-nome').value.trim();
+  if(!nome){toast('Informe o nome do cliente','error');return;}
+  const tel=document.getElementById('f-tel').value.trim();
+  const servId=+document.getElementById('f-serv').value;
+  const profId=document.getElementById('f-prof').value?+document.getElementById('f-prof').value:null;
+  const tipo=document.getElementById('f-tipo').value;
+  const hora=document.getElementById('f-hora').value||nowTime();
+  const data=document.getElementById('f-data')?.value || todayStr();
+  const serv=servicos.find(s=>s.id===servId);
+  if(!serv){toast('Selecione um serviço','error');return;}
+  const prof=profId?profissionais.find(p=>p.id===profId):null;
+  const item={id:nextId++,nome,tel,serv:{...serv},prof:prof?{...prof}:null,tipo,hora,status:tipo==='retroativo'?'concluido':'aguardando',data,ts:Date.now(),tsConc:Date.now(),horaFim:tipo==='retroativo'?hora:null,origem:'balcao'};
+  if(tipo==='retroativo'){
+    historico.push({...item});
+    if(item.prof){const p=profissionais.find(x=>x.id===item.prof.id);if(p){p.atendimentos=(p.atendimentos||0)+1;p.faturado=(p.faturado||0)+item.serv.preco;}}
+  }else{
+    fila.push(item);
+  }
+  document.getElementById('f-nome').value='';
+  document.getElementById('f-tel').value='';
+  persist();renderFila();renderMetrics();
+  toast(tipo==='retroativo'?`${nome} lançado em atendimento passado`:`${nome} adicionado à fila`,'success');
+}
+
+function renderFila(){
+  const el=document.getElementById('fila-list');
+  const ativos=fila.filter(x=>x.status!=='concluido');
+  document.getElementById('fila-count').textContent=ativos.length+' cliente'+(ativos.length!==1?'s':'');
+  if(!fila.length){el.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:30px 0;"><i class="ti ti-mood-empty" style="font-size:28px;display:block;margin-bottom:8px;"></i>Nenhum cliente na fila</div>';return;}
+  const sorted=[...fila].sort((a,b)=>{
+    const o={aguardando:0,em_atendimento:1,concluido:2};
+    if(o[a.status]!==o[b.status])return o[a.status]-o[b.status];
+    return a.hora.localeCompare(b.hora);
+  });
+  let num=1;
+  el.innerHTML=sorted.map(c=>{
+    const sp=c.status==='aguardando'?'<span class="pill pill-wait">Aguardando</span>':c.status==='em_atendimento'?'<span class="pill pill-in">Em atendimento</span>':'<span class="pill pill-done">Concluído</span>';
+    const agendPill=c.tipo==='agendado'?'<span class="pill pill-agend">Agend.</span>':'';
+    const portalPill=c.origem==='portal'?'<span class="pill pill-portal"><i class="ti ti-device-mobile" style="font-size:10px;"></i> App</span>':'';
+    const num_show=c.status==='concluido'?'✓':(num++);
+    const telShow=c.tel?`<span style="font-size:11px;color:var(--muted);"><i class="ti ti-phone" style="font-size:11px;"></i> ${c.tel}</span>`:'';
+    const profShow=c.prof?`<span style="font-size:11px;background:var(--blue-bg);color:var(--blue-text);padding:2px 7px;border-radius:99px;">${c.prof.nome.split(' ')[0]}</span>`:'';
+    const btns=c.status==='aguardando'
+      ?`<button class="btn btn-sm" style="background:var(--amber-bg);color:var(--amber2);border:1px solid var(--amber-border);" onclick="iniciar(${c.id})" title="Iniciar"><i class="ti ti-player-play"></i></button>
+         <button class="btn btn-danger btn-sm" onclick="removerFila(${c.id})" title="Remover"><i class="ti ti-trash"></i></button>`
+      :c.status==='em_atendimento'
+      ?`<button class="btn btn-success btn-sm" onclick="concluir(${c.id})" title="Concluir"><i class="ti ti-check"></i></button>`
+      :'';
+    return `<div class="queue-item status-${c.status}">
+      <div class="queue-num">${num_show}</div>
+      <div class="queue-info">
+        <div class="queue-name">${c.nome}</div>
+        <div class="queue-meta">${sp}${agendPill}${portalPill}
+          <span style="font-size:11px;color:var(--muted);">${c.serv.nome}</span>
+          ${profShow}${telShow}
+          <span style="font-size:11px;color:var(--muted);"><i class="ti ti-clock" style="font-size:10px;"></i> ${c.hora}</span>
+        </div>
+      </div>
+      <div class="queue-price">${brl(c.serv.preco)}</div>
+      <div class="queue-actions">${btns}</div>
+    </div>`;
+  }).join('');
+}
+
+function iniciar(id){
+  const c=fila.find(x=>x.id===id);if(c){c.status='em_atendimento';persist();renderFila();renderMetrics();}
+}
+function concluir(id){
+  const c=fila.find(x=>x.id===id);
+  if(c){
+    c.status='concluido';c.horaFim=nowTime();c.tsConc=Date.now();
+    historico.push({...c});
+    if(c.prof){const p=profissionais.find(x=>x.id===c.prof.id);if(p){p.atendimentos++;p.faturado+=c.serv.preco;}}
+    persist();renderFila();renderMetrics();renderProfs();
+    toast('Atendimento concluído!','success');
+  }
+}
+function removerFila(id){
+  if(!confirm('Remover cliente da fila?'))return;
+  fila=fila.filter(x=>x.id!==id);
+  persist();renderFila();renderMetrics();
+}
+
+/* ─── PROFISSIONAIS ─── */
+function renderProfs(){
+  const el=document.getElementById('prof-grid');
+  if(!profissionais.length){el.innerHTML='<div style="color:var(--muted);text-align:center;padding:30px;">Nenhum profissional cadastrado</div>';return;}
+  el.innerHTML=profissionais.map(p=>{
+    const ini=p.nome.split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();
+    const comVal=desbloqueado?brl((p.faturado||0)*(p.comissao||0)/100):'<span class="hidden-val"><span>••••</span><i class="ti ti-lock" style="font-size:11px;color:var(--amber);margin-left:3px;"></i></span>';
+    const fatVal=desbloqueado?brl(p.faturado||0):'<span class="hidden-val"><span>••••</span><i class="ti ti-lock" style="font-size:11px;color:var(--amber);margin-left:3px;"></i></span>';
+    const unlockBtn=!desbloqueado?`<button class="btn btn-ghost btn-xs" onclick="promptUnlock(()=>renderProfs())"><i class="ti ti-lock-open"></i> Ver valores</button>`:'';
+    return `<div class="prof-card">
+      <div class="prof-avatar">${ini}</div>
+      <div class="prof-card-name">${p.nome}</div>
+      <div class="prof-card-esp">${p.esp}</div>
+      <div class="prof-stats">
+        <div class="prof-stat-box"><div class="prof-stat-val">${p.atendimentos||0}</div><div class="prof-stat-lbl">Atend.</div></div>
+        <div class="prof-stat-box"><div class="prof-stat-val" style="font-size:12px;">${p.comissao||0}%</div><div class="prof-stat-lbl">Comissão</div></div>
+      </div>
+      <div style="display:grid;gap:6px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--muted);">Faturado</span><span style="color:var(--green-text);font-weight:600;">${fatVal}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--muted);">Comissão</span><span style="color:var(--amber2);font-weight:600;">${comVal}</span></div>
+      </div>
+      ${unlockBtn}
+      <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;">
+        <button class="btn btn-danger btn-sm" onclick="removeProf(${p.id})"><i class="ti ti-trash"></i> Remover</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addProf(){
+  const nome=document.getElementById('pf-nome').value.trim();
+  if(!nome){toast('Informe o nome','error');return;}
+  const esp=document.getElementById('pf-esp').value.trim()||'Barbeiro';
+  const com=parseFloat(document.getElementById('pf-com').value)||40;
+  const ps=document.getElementById('pf-senha').value.trim()||String(Math.floor(1000+Math.random()*9000));
+  if(!/^\d{4}$/.test(ps)){toast('Senha do barbeiro precisa ter 4 números','error');return;}
+  profissionais.push({id:Date.now(),nome,esp,comissao:com,senha:ps,atendimentos:0,faturado:0});
+  document.getElementById('pf-nome').value='';document.getElementById('pf-esp').value='';document.getElementById('pf-com').value='';document.getElementById('pf-senha').value='';
+  persist();renderProfs();populateSelects();toast('Profissional adicionado','success');
+}
+function removeProf(id){
+  if(!confirm('Remover profissional?'))return;
+  profissionais=profissionais.filter(p=>p.id!==id);
+  persist();renderProfs();populateSelects();toast('Profissional removido','info');
+}
+
+/* ─── SERVIÇOS ─── */
+const SVC_ICONS=['ti-scissors','ti-scissors','ti-user','ti-droplet','ti-palette','ti-sparkles','ti-star','ti-razor'];
+function renderServicos(){
+  const t=document.getElementById('svc-table');
+  if(!servicos.length){t.innerHTML='<tr><td style="text-align:center;color:var(--muted);padding:30px;" colspan="5">Nenhum serviço cadastrado</td></tr>';return;}
+  t.innerHTML=`<thead><tr>
+    <th style="width:36px;"></th><th>Serviço</th><th>Duração</th><th>Preço</th><th style="width:160px;">Ações</th>
+  </tr></thead><tbody>`+servicos.map((s,i)=>{
+    if(editingSvcId===s.id){
+      return `<tr class="editing" id="svcrow-${s.id}">
+        <td><div class="service-icon-cell" style="width:30px;height:30px;border-radius:50%;background:var(--amber-bg);color:var(--amber2);display:flex;align-items:center;justify-content:center;"><i class="ti ${SVC_ICONS[i%SVC_ICONS.length]}"></i></div></td>
+        <td><input class="edit-inp" id="ed-sn-${s.id}" value="${s.nome}" style="background:var(--bg2);border:1px solid var(--blue);color:var(--blue-text);padding:5px 8px;border-radius:var(--r);width:100%;font-size:13px;"></td>
+        <td><div style="display:flex;align-items:center;gap:6px;"><input class="edit-inp" id="ed-sd-${s.id}" type="number" value="${s.dur}" min="5" style="background:var(--bg2);border:1px solid var(--blue);color:var(--blue-text);padding:5px 8px;border-radius:var(--r);width:60px;font-size:13px;"> <span style="font-size:11px;color:var(--muted);">min</span></div></td>
+        <td><div style="display:flex;align-items:center;gap:4px;"><span style="font-size:12px;color:var(--muted);">R$</span><input class="edit-inp" id="ed-sp-${s.id}" type="number" value="${s.preco}" min="0" step="0.5" style="background:var(--bg2);border:1px solid var(--blue);color:var(--blue-text);padding:5px 8px;border-radius:var(--r);width:70px;font-size:13px;"></div></td>
+        <td><div style="display:flex;gap:4px;"><button class="btn btn-success btn-sm" onclick="salvarSvc(${s.id})"><i class="ti ti-check"></i> Salvar</button><button class="btn btn-ghost btn-sm" onclick="cancelEditSvc()"><i class="ti ti-x"></i></button></div></td>
+      </tr>`;
+    }
+    return `<tr id="svcrow-${s.id}">
+      <td><div style="width:30px;height:30px;border-radius:50%;background:var(--amber-bg);color:var(--amber2);display:flex;align-items:center;justify-content:center;"><i class="ti ${SVC_ICONS[i%SVC_ICONS.length]}" style="font-size:14px;"></i></div></td>
+      <td style="font-weight:500;">${s.nome}</td>
+      <td style="color:var(--muted);"><i class="ti ti-clock" style="font-size:12px;vertical-align:-1px;"></i> ${s.dur} min</td>
+      <td style="color:var(--green-text);font-weight:600;">${brl(s.preco)}</td>
+      <td><div style="display:flex;gap:4px;">
+        <button class="btn btn-info btn-sm" onclick="editSvc(${s.id})"><i class="ti ti-edit"></i> Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="removeSvc(${s.id})"><i class="ti ti-trash"></i></button>
+      </div></td>
+    </tr>`;
+  }).join('')+'</tbody>';
+}
+function editSvc(id){editingSvcId=id;renderServicos();const inp=document.getElementById('ed-sn-'+id);if(inp){inp.focus();inp.select();}}
+function cancelEditSvc(){editingSvcId=null;renderServicos();}
+function salvarSvc(id){
+  const s=servicos.find(x=>x.id===id);if(!s)return;
+  const nn=document.getElementById('ed-sn-'+id).value.trim();
+  const nd=parseInt(document.getElementById('ed-sd-'+id).value)||s.dur;
+  const np=parseFloat(document.getElementById('ed-sp-'+id).value);
+  if(!nn){toast('Nome não pode ser vazio','error');return;}
+  if(isNaN(np)||np<0){toast('Preço inválido','error');return;}
+  s.nome=nn;s.dur=nd;s.preco=np;editingSvcId=null;
+  persist();renderServicos();populateSelects();toast('Serviço atualizado','success');
+}
+function addServico(){
+  const nome=document.getElementById('sv-nome').value.trim();
+  if(!nome){toast('Informe o nome do serviço','error');return;}
+  const dur=parseInt(document.getElementById('sv-dur').value)||30;
+  const preco=parseFloat(document.getElementById('sv-preco').value)||0;
+  servicos.push({id:Date.now(),nome,dur,preco});
+  document.getElementById('sv-nome').value='';document.getElementById('sv-dur').value='';document.getElementById('sv-preco').value='';
+  persist();renderServicos();populateSelects();toast('Serviço adicionado','success');
+}
+function removeSvc(id){
+  if(!confirm('Remover este serviço?'))return;
+  servicos=servicos.filter(s=>s.id!==id);
+  if(editingSvcId===id)editingSvcId=null;
+  persist();renderServicos();populateSelects();toast('Serviço removido','info');
+}
+
+/* ─── LOCK ─── */
+function updateLockUI(){
+  const btn=document.getElementById('lock-btn');
+  const ic=document.getElementById('lock-icon');
+  const txt=document.getElementById('lock-txt');
+  if(desbloqueado){btn.className='lock-btn unlocked';ic.className='ti ti-lock-open';txt.textContent='Sessão aberta';}
+  else{btn.className='lock-btn';ic.className='ti ti-lock';txt.textContent='Sessão bloqueada';}
+}
+function toggleLock(){
+  if(desbloqueado){desbloqueado=false;updateLockUI();renderProfs();const cur=document.querySelector('.page.active');if(cur?.id==='page-extrato')renderExtLock();}
+  else promptUnlock(null);
+}
+function promptUnlock(cb){
+  const div=document.createElement('div');div.className='modal-bg';div.id='unlock-modal';
+  div.innerHTML=`<div class="modal">
+    <div class="modal-title">Área protegida</div>
+    <div class="modal-sub">Digite a senha de 4 dígitos para acessar dados financeiros</div>
+    <div class="pin-row">${[0,1,2,3].map(()=>'<input class="pin-inp" type="password" maxlength="1" inputmode="numeric">').join('')}</div>
+    <div class="modal-err" id="pin-err"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:2;" onclick="checkPin()"><i class="ti ti-lock-open"></i> Entrar</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px;">Senha padrão: 1234</div>
+  </div>`;
+  document.body.appendChild(div);
+  window._unlockCb=cb||null;
+  const pins=div.querySelectorAll('.pin-inp');pins[0].focus();
+  pins.forEach((inp,i)=>{
+    inp.addEventListener('input',()=>{inp.value=inp.value.replace(/\D/g,'');if(inp.value&&i<3)pins[i+1].focus();if(i===3&&inp.value)checkPin();});
+    inp.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!inp.value&&i>0){pins[i-1].focus();pins[i-1].value='';}if(e.key==='Enter')checkPin();});
+  });
+}
+function checkPin(){
+  const modal=document.getElementById('unlock-modal');if(!modal)return;
+  const pins=modal.querySelectorAll('.pin-inp');
+  const entered=Array.from(pins).map(p=>p.value).join('');
+  if(entered===senha){desbloqueado=true;closeModal();updateLockUI();renderProfs();
+    const cur=document.querySelector('.page.active');if(cur?.id==='page-extrato')showExtrato();
+    if(window._unlockCb)window._unlockCb();
+  }else{
+    const err=document.getElementById('pin-err');if(err)err.textContent='Senha incorreta. Tente novamente.';
+    pins.forEach(p=>p.value='');pins[0].focus();
+    setTimeout(()=>{if(err)err.textContent='';},2000);
+    toast('Senha incorreta','error');
+  }
+}
+function closeModal(){const m=document.getElementById('unlock-modal');if(m)m.remove();}
+
+/* ─── EXTRATO ─── */
+function renderExtLock(){
+  if(usuario?.tipo==='barbeiro'){showExtrato();return;}
+  document.getElementById('ext-content').style.display='none';
+  document.getElementById('ext-lock').innerHTML=`<div class="lock-screen">
+    <div class="lock-icon"><i class="ti ti-lock"></i></div>
+    <div class="lock-title">Extrato protegido</div>
+    <div class="lock-sub">Esta área contém dados financeiros sigilosos. Digite a senha para visualizar o extrato e comissões.</div>
+    <button class="btn btn-primary" onclick="promptUnlock(()=>{if(desbloqueado)showExtrato();})"><i class="ti ti-lock-open"></i> Desbloquear extrato</button>
+    <div style="font-size:11px;color:var(--muted);">Senha padrão: 1234 — altere em Configurações</div>
+  </div>`;
+}
+function lockExtrato(){desbloqueado=false;updateLockUI();renderExtLock();}
+
+function showExtrato(){
+  document.getElementById('ext-lock').innerHTML='';
+  document.getElementById('ext-content').style.display='';
+  const sel=document.getElementById('ext-prof');
+  sel.innerHTML = usuario?.tipo==='barbeiro' ? profissionais.filter(p=>p.id===usuario.profId).map(p=>`<option value="${p.id}">${p.nome}</option>`).join('') : '<option value="">Todos os profissionais</option>'+profissionais.map(p=>`<option value="${p.id}">${p.nome}</option>`).join('');
+  document.getElementById('ext-de').value=todayStr();
+  document.getElementById('ext-ate').value=todayStr();
+  gerarExtrato();
+}
+
+function gerarExtrato(){
+  const profId=document.getElementById('ext-prof').value;
+  const de=document.getElementById('ext-de').value;
+  const ate=document.getElementById('ext-ate').value;
+  let dados=[...historico];
+  if(usuario?.tipo==='barbeiro') dados=dados.filter(x=>x.prof&&x.prof.id===usuario.profId);
+  else if(profId)dados=dados.filter(x=>x.prof&&x.prof.id===+profId);
+  if(de)dados=dados.filter(x=>x.data>=de);
+  if(ate)dados=dados.filter(x=>x.data<=ate);
+  const t=document.getElementById('ext-table');
+  const sum=document.getElementById('ext-summary');
+  if(!dados.length){
+    t.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px;">Nenhum atendimento no período</td></tr>';
+    sum.innerHTML='';return;
+  }
+  let total=0,totalCom=0;
+  const rows=dados.map(c=>{
+    const com=c.prof?(c.serv.preco*(c.prof.comissao||0)/100):0;
+    total+=c.serv.preco;totalCom+=com;
+    const editWindow=c.tsConc?canEditProf(c.tsConc):'';
+    const hrsLeft=c.tsConc?Math.max(0,24-sinceHours(c.tsConc)):0;
+    const editBtn=c.tsConc&&canEditProf(c.tsConc)
+      ?`<button class="btn btn-info btn-xs" onclick="pedirAutorizacaoAdmin(()=>editHistProf(${c.id}))" title="Editar profissional (${hrsLeft.toFixed(1)}h restantes)"><i class="ti ti-edit" style="font-size:11px;"></i></button>`
+      :(c.tsConc?`<span style="font-size:10px;color:var(--muted);" title="Prazo de edição expirado">🔒</span>`:'');
+    const tel=c.tel?`<div style="font-size:10px;color:var(--muted);"><i class="ti ti-phone" style="font-size:10px;"></i> ${c.tel}</div>`:'';
+    return `<tr>
+      <td>${(c.data||'').split('-').reverse().join('/')} ${c.horaFim||''}</td>
+      <td><div style="font-weight:500;">${c.nome}</div>${tel}</td>
+      <td>${c.serv.nome}</td>
+      <td><div style="display:flex;align-items:center;gap:5px;">${c.prof?c.prof.nome:'—'}${editBtn}</div></td>
+      <td style="color:var(--green-text);font-weight:600;">${brl(c.serv.preco)}</td>
+      <td style="color:var(--amber2);">${brl(com)}</td>
+      <td style="font-weight:600;">${brl(c.serv.preco-com)}</td>
+      <td><span class="pill ${c.origem==='portal'?'pill-portal':'pill-done'}" style="font-size:10px;">${c.origem==='portal'?'App':'Balcão'}</span></td>
+    </tr>`;
+  }).join('');
+  t.innerHTML=`<thead><tr>
+    <th>Data/Hora</th><th>Cliente</th><th>Serviço</th><th>Profissional</th><th>Valor</th><th>Comissão</th><th>Líquido</th><th>Origem</th>
+  </tr></thead><tbody>${rows}
+  <tr class="ext-total">
+    <td colspan="4" style="color:var(--muted);">TOTAL — ${dados.length} atendimento${dados.length!==1?'s':''}</td>
+    <td style="color:var(--green-text);">${brl(total)}</td>
+    <td style="color:var(--amber2);">${brl(totalCom)}</td>
+    <td>${brl(total-totalCom)}</td><td></td>
+  </tr></tbody>`;
+  sum.innerHTML = usuario?.tipo==='barbeiro' ? `
+    <div class="metric amber" style="padding:12px;"><div class="metric-icon amber" style="width:26px;height:26px;border-radius:6px;margin-bottom:6px;"><i class="ti ti-percentage" style="font-size:14px;"></i></div><div class="metric-val" style="font-size:18px;">${brl(totalCom)}</div><div class="metric-label">Sua comissão final</div></div>
+    <div class="metric blue" style="padding:12px;"><div class="metric-icon blue" style="width:26px;height:26px;border-radius:6px;margin-bottom:6px;"><i class="ti ti-scissors" style="font-size:14px;"></i></div><div class="metric-val" style="font-size:18px;">${dados.length}</div><div class="metric-label">Seus serviços</div></div>` : `
+    <div class="metric green" style="padding:12px;"><div class="metric-icon green" style="width:26px;height:26px;border-radius:6px;margin-bottom:6px;"><i class="ti ti-cash" style="font-size:14px;"></i></div><div class="metric-val" style="font-size:18px;">${brl(total)}</div><div class="metric-label">Faturamento bruto</div></div>
+    <div class="metric amber" style="padding:12px;"><div class="metric-icon amber" style="width:26px;height:26px;border-radius:6px;margin-bottom:6px;"><i class="ti ti-percentage" style="font-size:14px;"></i></div><div class="metric-val" style="font-size:18px;">${brl(totalCom)}</div><div class="metric-label">Total comissões</div></div>
+    <div class="metric purple" style="padding:12px;"><div class="metric-icon purple" style="width:26px;height:26px;border-radius:6px;margin-bottom:6px;"><i class="ti ti-building-bank" style="font-size:14px;"></i></div><div class="metric-val" style="font-size:18px;">${brl(total-totalCom)}</div><div class="metric-label">Líquido da barbearia</div></div>`;
+}
+
+function editHistProf(id){
+  const c=historico.find(x=>x.id===id);if(!c)return;
+  if(!canEditProf(c.tsConc)){toast('Prazo de 24h expirado para edição','error');return;}
+  const div=document.createElement('div');div.className='modal-bg';div.id='edit-prof-modal';
+  const hrsLeft=(24-sinceHours(c.tsConc)).toFixed(1);
+  div.innerHTML=`<div class="modal">
+    <div class="modal-title">Editar profissional</div>
+    <div class="modal-sub">Atendimento: <strong style="color:var(--text);">${c.nome}</strong> — ${c.serv.nome}<br><span style="color:var(--amber2);">⏰ ${hrsLeft}h restantes para edição</span></div>
+    <div class="field"><label>Profissional</label>
+      <select id="edit-prof-sel">
+        <option value="">Sem profissional</option>
+        ${profissionais.map(p=>`<option value="${p.id}" ${c.prof?.id===p.id?'selected':''}>${p.nome}</option>`).join('')}
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('edit-prof-modal').remove()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:2;" onclick="salvarHistProf(${id})"><i class="ti ti-check"></i> Salvar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+
+function salvarHistProf(id){
+  const c=historico.find(x=>x.id===id);if(!c)return;
+  const sel=document.getElementById('edit-prof-sel');
+  const profId=sel.value?+sel.value:null;
+  const oldProf=c.prof;
+  const newProf=profId?profissionais.find(p=>p.id===profId):null;
+  // revert old
+  if(oldProf){const op=profissionais.find(p=>p.id===oldProf.id);if(op){op.atendimentos=Math.max(0,(op.atendimentos||1)-1);op.faturado=Math.max(0,(op.faturado||c.serv.preco)-c.serv.preco);}}
+  // apply new
+  c.prof=newProf?{...newProf}:null;
+  if(newProf){const np=profissionais.find(p=>p.id===newProf.id);if(np){np.atendimentos=(np.atendimentos||0)+1;np.faturado=(np.faturado||0)+c.serv.preco;}}
+  document.getElementById('edit-prof-modal').remove();
+  persist();gerarExtrato();renderProfs();toast('Profissional atualizado','success');
+}
+
+function exportCSV(){
+  const rows=[['Data','Hora','Cliente','Telefone','Serviço','Profissional','Valor','Comissão%','Comissão R$','Líquido','Origem']];
+  historico.forEach(c=>{
+    const com=c.prof?(c.serv.preco*(c.prof.comissao||0)/100):0;
+    rows.push([(c.data||'').split('-').reverse().join('/'),c.horaFim||'',c.nome,c.tel||'',c.serv.nome,c.prof?c.prof.nome:'',c.serv.preco.toFixed(2),(c.prof?.comissao||0),com.toFixed(2),(c.serv.preco-com).toFixed(2),c.origem==='portal'?'App':'Balcão']);
+  });
+  const csv=rows.map(r=>r.join(';')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download='extrato_barbearia_'+todayStr()+'.csv';a.click();
+  toast('Extrato exportado','success');
+}
+
+/* ─── PORTAL ─── */
+function abrirPortal(modo){
+  portalMode=modo;pServSel=null;pProfSel=null;pTimeSel=null;
+  document.getElementById('portal-area').style.display='';
+  renderPortal();
+  document.getElementById('portal-area').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function fecharPortal(){document.getElementById('portal-area').style.display='none';}
+
+function renderPortal(){
+  const filaAtiva=fila.filter(x=>x.status==='aguardando'||x.status==='em_atendimento').length;
+  const espMin=filaAtiva*25;
+  document.getElementById('p-bizname').textContent=config.nome;
+  document.getElementById('p-fila-status').textContent=`${filaAtiva} na fila — ~${espMin} min`;
+  const el=document.getElementById('portal-body');
+  // Tabs
+  const tabs=`<div style="display:flex;border-bottom:1px solid var(--border);margin:-16px -16px 14px;background:var(--bg2);">
+    ${portalMode!=='agendamento'?`<div style="flex:1;padding:11px;text-align:center;font-size:13px;cursor:pointer;color:var(--amber2);font-weight:500;border-bottom:2px solid var(--amber);background:var(--amber-bg);" onclick="portalMode='fila';renderPortal()"><i class='ti ti-walk'></i> Fila</div>`:''}
+    ${portalMode!=='fila'?`<div style="flex:1;padding:11px;text-align:center;font-size:13px;cursor:pointer;color:var(--amber2);font-weight:500;border-bottom:2px solid var(--amber);background:var(--amber-bg);" onclick="portalMode='agendamento';renderPortal()"><i class='ti ti-calendar'></i> Agendar</div>`:''}
+  </div>`;
+  const svcOpts=servicos.map(s=>`<div class="svc-opt${pServSel===s.id?' sel':''}" onclick="pServSel=${s.id};renderPortal()">
+    <div style="width:36px;height:36px;border-radius:50%;background:var(--amber-bg);color:var(--amber2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;"><i class="ti ti-scissors"></i></div>
+    <div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">${s.nome}</div><div style="font-size:11px;color:var(--muted);"><i class="ti ti-clock" style="font-size:10px;"></i> ${s.dur} min</div></div>
+    <div style="color:var(--green-text);font-weight:600;font-size:13px;">${brl(s.preco)}</div>
+  </div>`).join('');
+  const profOpts='<div class="prof-opt'+(pProfSel===0?' sel':'')+'" onclick="pProfSel=0;renderPortal()"><div style="width:36px;height:36px;border-radius:50%;background:var(--border2);color:var(--muted);display:flex;align-items:center;justify-content:center;"><i class="ti ti-user-question" style="font-size:16px;"></i></div><div><div style="font-size:13px;font-weight:500;color:var(--text);">Sem preferência</div><div style="font-size:11px;color:var(--muted);">Próximo disponível</div></div></div>'+
+    profissionais.map(p=>{const ini=p.nome.split(' ').slice(0,2).map(x=>x[0]).join('');return `<div class="prof-opt${pProfSel===p.id?' sel':''}" onclick="pProfSel=${p.id};renderPortal()"><div style="width:36px;height:36px;border-radius:50%;background:var(--amber-bg);color:var(--amber2);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;">${ini}</div><div><div style="font-size:13px;font-weight:500;color:var(--text);">${p.nome}</div><div style="font-size:11px;color:var(--muted);">${p.esp}</div></div></div>`;}).join('');
+  const times=['08:00','08:30','09:00','09:30','10:00','10:30','11:00','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
+  const timeOpts=times.map(t=>`<div class="time-btn${pTimeSel===t?' sel':''}" onclick="pTimeSel='${t}';renderPortal()">${t}</div>`).join('');
+  el.innerHTML=tabs+`
+    <div id="pstep-serv" class="portal-step active">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;">1. Escolha o serviço</div>
+      ${svcOpts}
+      <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="pGoStep('prof')" ${pServSel?'':'disabled'}>Continuar <i class="ti ti-arrow-right"></i></button>
+    </div>
+    <div id="pstep-prof" class="portal-step">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;">2. Escolha o profissional</div>
+      ${profOpts}
+      <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="pGoStep('info')" ${pProfSel!==null?'':'disabled'}>Continuar <i class="ti ti-arrow-right"></i></button>
+      <button class="btn btn-ghost btn-full" style="margin-top:6px;" onclick="pGoStep('serv')">Voltar</button>
+    </div>
+    <div id="pstep-info" class="portal-step">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;">3. Seus dados</div>
+      <div class="field"><label>Seu nome</label><input id="p-nome" placeholder="Como prefere ser chamado"></div>
+      <div class="field"><label>Telefone</label><input id="p-tel" placeholder="(00) 00000-0000" oninput="maskPhone(this)" maxlength="15"></div>
+      ${portalMode==='agendamento'?`<div class="field"><label>Data</label><input type="date" id="p-data" value="${todayStr()}"></div><div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Horário disponível</div><div class="time-grid">${timeOpts}</div>`:''}
+      <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="pConfirmar()"><i class="ti ti-check"></i> ${portalMode==='agendamento'?'Confirmar agendamento':'Entrar na fila'}</button>
+      <button class="btn btn-ghost btn-full" style="margin-top:6px;" onclick="pGoStep('prof')">Voltar</button>
+    </div>
+    <div id="pstep-ok" class="portal-step"></div>`;
+}
+
+function pGoStep(step){
+  document.querySelectorAll('.portal-step').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('pstep-'+step);if(el)el.classList.add('active');
+}
+function pConfirmar(){
+  const nome=document.getElementById('p-nome').value.trim();
+  if(!nome){toast('Informe seu nome','error');return;}
+  const tel=document.getElementById('p-tel').value.trim();
+  const serv=servicos.find(s=>s.id===pServSel);
+  const prof=pProfSel?profissionais.find(p=>p.id===pProfSel):null;
+  const hora=portalMode==='agendamento'?(pTimeSel||nowTime()):nowTime();
+  const tipo=portalMode==='agendamento'?'agendado':'chegada';
+  const item={id:nextId++,nome,tel,serv:{...serv},prof:prof?{...prof}:null,tipo,hora,status:'aguardando',data:todayStr(),ts:Date.now(),origem:'portal'};
+  fila.push(item);persist();renderFila();renderMetrics();
+  const pos=fila.filter(x=>x.status==='aguardando').length;
+  const espMin=pos*25;
+  document.getElementById('pstep-ok').innerHTML=`<div class="portal-success">
+    <div style="width:60px;height:60px;border-radius:50%;background:var(--green-bg);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;"><i class="ti ti-check" style="font-size:28px;color:var(--green-text);"></i></div>
+    <div class="portal-pos">#${pos}º</div>
+    <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--text);margin-bottom:8px;">${portalMode==='agendamento'?'Agendamento confirmado!':'Você está na fila!'}</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;">${portalMode==='agendamento'?`Horário reservado: <strong style="color:var(--text);">${pTimeSel}</strong>. Apareça 5 min antes.`:`Você é o <strong style="color:var(--amber2);">#${pos}º</strong> na fila.<br>Tempo estimado: <strong style="color:var(--text);">~${espMin} min</strong>`}</div>
+    <div style="margin-top:10px;font-size:13px;color:var(--muted);">Serviço: <strong style="color:var(--text);">${serv.nome}</strong>${prof?`<br>Com: <strong style="color:var(--text);">${prof.nome}</strong>`:''}</div>
+    <button class="btn btn-ghost btn-full" style="margin-top:16px;" onclick="pReset()"><i class="ti ti-arrow-left"></i> Voltar ao início</button>
+  </div>`;
+  pGoStep('ok');toast(`${nome} entrou na fila pelo app`,'success');
+}
+function pReset(){pServSel=null;pProfSel=null;pTimeSel=null;renderPortal();pGoStep('serv');}
+
+/* ─── LINK HELPERS ─── */
+function copiarLink(id){
+  const txt='https://'+document.getElementById(id).textContent.trim();
+  navigator.clipboard.writeText(txt).catch(()=>{});
+  toast('Link copiado!','success');
+}
+
+
+/* ─── LOGIN / PERMISSÕES ─── */
+function isAdmin(){return usuario?.tipo==='admin';}
+function isBarbeiro(){return usuario?.tipo==='barbeiro';}
+function updateSessionUI(){
+  const chip=document.getElementById('session-chip');
+  if(!chip)return;
+  if(isAdmin()) chip.innerHTML='<i class="ti ti-shield-lock"></i> <span>Admin</span>';
+  else if(isBarbeiro()){const p=profissionais.find(x=>x.id===usuario.profId);chip.innerHTML=`<i class="ti ti-user"></i> <span>${p?p.nome.split(' ')[0]:'Barbeiro'}</span>`;}
+  else chip.innerHTML='<i class="ti ti-user-lock"></i> <span>Login</span>';
+  const note=document.getElementById('cfg-admin-note'); if(note) note.style.display=isAdmin()?'none':'';
+}
+function abrirLogin(){
+  const div=document.createElement('div');div.className='modal-bg';div.id='login-modal';
+  div.innerHTML=`<div class="modal" style="width:380px;">
+    <div class="modal-title">Entrar no sistema</div>
+    <div class="modal-sub">Admin gerencia tudo. Barbeiro vê apenas os próprios serviços e comissão.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div class="login-role active" id="role-admin" onclick="setLoginRole('admin')"><i class="ti ti-shield-lock"></i> Admin</div>
+      <div class="login-role" id="role-barbeiro" onclick="setLoginRole('barbeiro')"><i class="ti ti-scissors"></i> Barbeiro</div>
+    </div>
+    <div class="field" id="login-prof-wrap" style="display:none;"><label>Profissional</label><select id="login-prof">${profissionais.map(p=>`<option value="${p.id}">${p.nome}</option>`).join('')}</select></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-senha" maxlength="4" inputmode="numeric" placeholder="4 dígitos"></div>
+    <div id="login-err" class="modal-err"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('login-modal').remove()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:2;" onclick="confirmarLogin()"><i class="ti ti-login"></i> Entrar</button>
+    </div>
+    ${usuario?'<button class="btn btn-danger btn-full" style="margin-top:8px;" onclick="sairLogin()"><i class="ti ti-logout"></i> Sair da sessão</button>':''}
+  </div>`;
+  document.body.appendChild(div);
+  window._loginRole='admin';
+  setTimeout(()=>document.getElementById('login-senha')?.focus(),50);
+}
+function setLoginRole(role){
+  window._loginRole=role;
+  document.getElementById('role-admin')?.classList.toggle('active',role==='admin');
+  document.getElementById('role-barbeiro')?.classList.toggle('active',role==='barbeiro');
+  const w=document.getElementById('login-prof-wrap'); if(w) w.style.display=role==='barbeiro'?'':'none';
+}
+function confirmarLogin(){
+  const role=window._loginRole||'admin'; const pass=document.getElementById('login-senha').value;
+  if(role==='admin'){
+    if(pass!==senha){document.getElementById('login-err').textContent='Senha do admin incorreta.';return;}
+    usuario={tipo:'admin'}; desbloqueado=true;
+  }else{
+    const id=+document.getElementById('login-prof').value; const p=profissionais.find(x=>x.id===id);
+    if(!p||String(p.senha)!==pass){document.getElementById('login-err').textContent='Senha do barbeiro incorreta.';return;}
+    usuario={tipo:'barbeiro',profId:id}; desbloqueado=false;
+  }
+  persist();updateLockUI();updateSessionUI();document.getElementById('login-modal')?.remove();
+  renderProfs();populateSelects();renderFila();renderMetrics();
+  const cur=document.querySelector('.page.active'); if(cur?.id==='page-extrato')showExtrato(); if(cur?.id==='page-config')loadConfig();
+  toast('Login realizado','success');
+}
+function sairLogin(){usuario=null;desbloqueado=false;persist();document.getElementById('login-modal')?.remove();updateLockUI();updateSessionUI();toast('Sessão encerrada','info');}
+function pedirAutorizacaoAdmin(cb){
+  if(isAdmin()||desbloqueado){cb();return;}
+  const div=document.createElement('div');div.className='modal-bg';div.id='auth-admin-modal';
+  div.innerHTML=`<div class="modal">
+    <div class="modal-title">Autorização do admin</div>
+    <div class="modal-sub">Digite a senha do admin para liberar esta edição.</div>
+    <div class="field"><label>Senha do admin</label><input type="password" id="auth-admin-pass" maxlength="4" inputmode="numeric"></div>
+    <div id="auth-admin-err" class="modal-err"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;"><button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('auth-admin-modal').remove()">Cancelar</button><button class="btn btn-primary" style="flex:2;" onclick="confirmarAutorizacaoAdmin()"><i class="ti ti-lock-open"></i> Autorizar</button></div>
+  </div>`;
+  document.body.appendChild(div); window._adminAuthCb=cb; setTimeout(()=>document.getElementById('auth-admin-pass')?.focus(),50);
+}
+function confirmarAutorizacaoAdmin(){
+  const pass=document.getElementById('auth-admin-pass').value;
+  if(pass!==senha){document.getElementById('auth-admin-err').textContent='Senha incorreta.';return;}
+  document.getElementById('auth-admin-modal')?.remove();
+  const cb=window._adminAuthCb; window._adminAuthCb=null; if(cb)cb();
+}
+
+/* ─── CONFIG ─── */
+function loadConfig(){
+  document.getElementById('cfg-nome').value=config.nome||'';
+  document.getElementById('cfg-end').value=config.end||'';
+  document.getElementById('cfg-tel').value=config.tel||'';
+  renderConfigProfSenhas();
+  updateSessionUI();
+}
+function toggleConfigCard(header){header.closest('.config-card')?.classList.toggle('collapsed');}
+function renderConfigProfSenhas(){
+  const el=document.getElementById('cfg-prof-senhas'); if(!el)return;
+  if(!isAdmin()){el.innerHTML='<div class="admin-only-note">Somente o admin pode visualizar ou alterar senhas dos barbeiros.</div>';return;}
+  el.innerHTML=profissionais.map(p=>`<div style="display:grid;grid-template-columns:1fr 110px auto;gap:8px;align-items:end;margin-bottom:8px;"><div><label style="font-size:11px;color:var(--muted);font-weight:600;">${p.nome}</label><div style="font-size:11px;color:var(--muted2);">Comissão ${p.comissao||0}%</div></div><input type="password" id="cfg-prof-pass-${p.id}" maxlength="4" inputmode="numeric" value="${p.senha||''}"><button class="btn btn-secondary btn-sm" onclick="salvarSenhaProf(${p.id})"><i class="ti ti-check"></i> Salvar</button></div>`).join('')||'<div style="color:var(--muted);font-size:12px;">Nenhum barbeiro cadastrado.</div>';
+}
+function salvarSenhaProf(id){
+  if(!isAdmin()){toast('Somente admin altera senha de barbeiro','error');return;}
+  const v=document.getElementById('cfg-prof-pass-'+id).value.trim();
+  if(!/^\d{4}$/.test(v)){toast('Use 4 números na senha','error');return;}
+  const p=profissionais.find(x=>x.id===id); if(p){p.senha=v;persist();toast('Senha do barbeiro salva','success');}
+}
+function salvarConfig(){
+  if(!isAdmin()){pedirAutorizacaoAdmin(salvarConfig);return;}
+  config.nome=document.getElementById('cfg-nome').value.trim()||'Minha Barbearia';
+  config.end=document.getElementById('cfg-end').value.trim();
+  config.tel=document.getElementById('cfg-tel').value.trim();
+  persist();
+  document.getElementById('sb-barbname').textContent=config.nome;
+  document.getElementById('url-fila').textContent='barberpro.app/fila/'+slug();
+  document.getElementById('url-agend').textContent='barberpro.app/agendar/'+slug();
+  toast('Dados salvos com sucesso','success');
+}
+function alterarSenha(){
+  if(!isAdmin()){pedirAutorizacaoAdmin(alterarSenha);return;}
+  const atual=document.getElementById('cfg-s-atual').value;
+  const nova=document.getElementById('cfg-s-nova').value;
+  const conf=document.getElementById('cfg-s-conf').value;
+  const msg=document.getElementById('cfg-msg');
+  if(atual!==senha){msg.style.color='var(--red-text)';msg.textContent='Senha atual incorreta.';return;}
+  if(nova.length!==4||!/^\d{4}$/.test(nova)){msg.style.color='var(--red-text)';msg.textContent='Nova senha: exatamente 4 dígitos numéricos.';return;}
+  if(nova!==conf){msg.style.color='var(--red-text)';msg.textContent='As senhas não coincidem.';return;}
+  senha=nova;persist();
+  ['cfg-s-atual','cfg-s-nova','cfg-s-conf'].forEach(id=>document.getElementById(id).value='');
+  msg.style.color='var(--green-text)';msg.textContent='Senha alterada com sucesso!';
+  setTimeout(()=>msg.textContent='',3000);
+  toast('Senha alterada','success');
+}
+function exportarBackup(){
+  const data={config,profissionais,servicos,fila,historico,exportedAt:new Date().toISOString()};
+  const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data,null,2));a.download='backup_barberpro_'+todayStr()+'.json';a.click();
+  toast('Backup exportado','success');
+}
+function limparDados(){
+  if(!confirm('Tem certeza? Todos os dados serão apagados permanentemente!'))return;
+  if(!confirm('Última confirmação — esta ação não pode ser desfeita!'))return;
+  Object.values(K).forEach(k=>localStorage.removeItem(k));
+  toast('Dados apagados. Recarregando...','info');
+  setTimeout(()=>location.reload(),1500);
+}
+
+/* ─── INIT ─── */
+populateSelects();
+renderFila();
+renderMetrics();
+updateSessionUI();
+document.getElementById('sb-barbname').textContent=config.nome;
+document.getElementById('url-fila').textContent='barberpro.app/fila/'+slug();
+document.getElementById('url-agend').textContent='barberpro.app/agendar/'+slug();
+
+if(!usuario) setTimeout(()=>abrirLogin(),500);
+
+// Auto-save on any change
+setInterval(persist,30000);
+</script>
+</body>
+</html>
